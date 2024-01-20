@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.panda.system.mapper.SysMovieMapper">
+
+    <resultMap id="SysMovieResult" type="SysMovie">
+        <id property="movieId" column="movie_id"></id>
+        <collection property="movieCategoryList" column="movie_id" select="com.panda.system.mapper.SysMovieCategoryMapper.findOneMovieCategorys"></collection>
+    </resultMap>
+
+    <select id="findAllMovies" resultMap="SysMovieResult" parameterType="SysMovieVo">
+        select sm.* from sys_movie sm
+        <if test="movieCategoryId != null and movieCategoryId > 0">
+            join sys_movie_to_category smtc on sm.movie_id = smtc.movie_id
+            join sys_movie_category smc on smtc.movie_category_id = smc.movie_category_id
+        </if>
+        <where>
+            del_state = 0
+            <if test="movieName != null and movieName != ''">
+                and sm.movie_name like concat('%', #{movieName}, '%')
+            </if>
+            <if test="movieArea != null and movieArea !=''">
+                and sm.movie_area = #{movieArea}
+            </if>
+            <if test="startDate != null">
+                and sm.release_date &gt;= #{startDate}
+            </if>
+            <if test="endDate != null">
+                and sm.release_date &lt;= #{endDate}</if>
+            <if test="movieCategoryId != null and movieCategoryId > 0">
+                and smc.movie_category_id = #{movieCategoryId}
+            </if>
+        </where>
+    </select>
+
+    <select id="findMovieById" resultMap="SysMovieResult" parameterType="long">
+        select * from sys_movie where movie_id = #{id}
+    </select>
+
+    <!--根据id查询单个电影信息，不需要相关的额外信息-->
+    <select id="findOneMovie" resultType="SysMovie" parameterType="long">
+        select * from sys_movie where movie_id = #{id}
+    </select>
+
+    <update id="addMovie" parameterType="SysMovie">
+        insert into sys_movie(
+            <if test=" movieName != null and movieName != ''">movie_name,</if>
+            <if test=" movieLength != null and movieLength != 0">movie_length,</if>
+            <if test=" moviePoster != null and moviePoster != ''">movie_poster,</if>
+            <if test=" movieArea != null and movieArea != ''">movie_area,</if>
+            <if test=" movieIntroduction != null and movieIntroduction != ''">movie_introduction,</if>
+            <if test=" releaseDate != null">release_date,</if>
+            <if test=" moviePictures != null and moviePictures != ''">movie_pictures</if>
+        ) values(
+            <if test=" movieName != null and movieName != ''">#{movieName},</if>
+            <if test=" movieLength != null and movieLength != 0">#{movieLength},</if>
+            <if test=" moviePoster != null and moviePoster != ''">#{moviePoster},</if>
+            <if test=" movieArea != null and movieArea != ''">#{movieArea},</if>
+            <if test=" movieIntroduction != null and movieIntroduction != ''">#{movieIntroduction},</if>
+            <if test=" releaseDate != null">#{releaseDate},</if>
+            <if test=" moviePictures != null and moviePictures != ''">#{moviePictures}</if>
+        )
+    </update>
+
+    <update id="updateMovie" parameterType="SysMovie">
+        update sys_movie
+        set
+        <if test=" movieName != null and movieName != ''">movie_name = #{movieName},</if>
+        <if test=" movieLength != null and movieLength != 0">movie_length = #{movieLength},</if>
+        <if test=" moviePoster != null and moviePoster != ''">movie_poster = #{moviePoster},</if>
+        <if test=" movieIntroduction != null and movieIntroduction != ''">movie_introduction = #{movieIntroduction},</if>
+        <if test=" releaseDate != null">release_date = #{releaseDate},</if>
+        <if test=" movieBoxOffice != null">movie_box_office = #{movieBoxOffice},</if>
+        <if test=" moviePictures != null and moviePictures != ''">movie_pictures = #{moviePictures},</if>
+        <if test=" movieArea != null and movieArea != ''">movie_area = #{movieArea}</if>
+        where movie_id = #{movieId}
+    </update>
+
+    <update id="deleteMovie" parameterType="Long">
+        update sys_movie set del_state = 1 where movie_id = #{movieId}
+    </update>
+
+    <!--查询指定影院的所有上映电影，包含主演名字、影片类别-->
+    <select id="findMovieByCinemaId" parameterType="Long" resultMap="SysMovieResult">
+        select distinct sm.* from sys_movie sm
+        join sys_session ss on sm.movie_id = ss.movie_id
+        where ss.session_date &gt;= CURDATE() and ss.session_date &lt; ADDDATE(curdate(),5)
+    </select>
+
+    <!-- 查询各种榜单信息 -->
+    <!-- 总票房榜 -->
+    <select id="totalBoxOfficeList" resultMap="SysMovieResult">
+        select sm.* from sys_movie sm
+        where del_state = 0 and sm.release_date &lt;= curdate()
+        order by sm.movie_box_office desc
+    </select>
+
+    <!-- 国内票房榜：已上映的国内电影中，按票房取前10 -->
+    <select id="domesticBoxOfficeList" resultMap="SysMovieResult">
+        select sm.* from sys_movie sm
+        where del_state = 0 and sm.movie_area in ("中国大陆", "中国香港", "中国台湾") and sm.release_date &lt;= curdate()
+        order by sm.movie_box_office desc
+    </select>
+    
+    <!-- 国外票房榜：已上映的国外电影中，按票房取前10 -->
+    <select id="foreignBoxOfficeList" resultMap="SysMovieResult">
+        select sm.* from sys_movie sm
+        where del_state = 0 and sm.movie_area not in ("中国大陆", "中国香港", "中国台湾") and sm.release_date &lt;= curdate()
+        order by sm.movie_box_office desc
+    </select>
+</mapper>

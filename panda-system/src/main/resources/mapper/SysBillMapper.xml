@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.panda.system.mapper.SysBillMapper">
+
+    <resultMap id="BillMap" type="SysBill">
+        <id property="billId" column="bill_id"></id>
+        <result property="userId" column="user_id"></result>
+        <result property="sessionId" column="session_id"></result>
+        <association property="sysSession" column="session_id" select="com.panda.system.mapper.SysSessionMapper.findSessionById"></association>
+        <association property="sysUser" column="user_id" select="com.panda.system.mapper.SysUserMapper.findUserById"></association>
+    </resultMap>
+
+    <select id="findAllBills" parameterType="SysBill" resultMap="BillMap">
+        select * from sys_bill
+        <where>
+            <if test="payState != null"> and pay_state = #{payState} </if>
+            <if test="sessionId != null and sessionId !=''"> and session_id = #{sessionId} </if>
+            <if test="queryByUserName != null and queryByUserName != ''">
+                and user_id in
+                (select user_id
+                 from sys_user
+                 where user_name like concat('%', #{queryByUserName}, '%'))
+            </if>
+            <if test="userId != null"> and user_id = #{userId} </if>
+            <if test="createTime != null"> and create_time &gt;= #{createTime} and create_time &lt;= adddate(#{createTime}, 1) </if>
+        </where>
+        order by bill_id desc
+    </select>
+
+    <select id="findBillById" parameterType="long" resultMap="BillMap">
+        select * from sys_bill where bill_id = #{id}
+    </select>
+
+    <select id="findTimeoutBill" resultMap="BillMap">
+        select * from sys_bill where sysdate() >= deadline and cancel_state = 0 and pay_state = 0
+    </select>
+
+    <insert id="addBill" useGeneratedKeys="true" keyProperty="billId" parameterType="SysBill">
+        insert into sys_bill (
+            <if test="payState != null">pay_state, </if>
+            user_id, session_id, seats, create_time, deadline
+        ) values (
+            <if test="payState != null">#{payState}, </if>
+            #{userId}, #{sessionId}, #{seats},
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createTime == null">sysdate(),</if>
+            addtime(sysdate(), 15*100)
+        )
+    </insert>
+
+    <update id="updateBill" parameterType="SysBill">
+        update sys_bill set
+        <if test="payState != null">pay_state = #{payState}, </if>
+        <if test="cancelState != null">cancel_state = #{cancelState}, </if>
+        <if test="payState != null">pay_state = #{payState}, </if>
+        <if test="seats != null and seats != ''">seats = #{seats}, </if>
+        <if test="cancelTime != null ">cancel_time = #{cancelTime}, </if>
+        create_time = sysdate()
+        where bill_id = #{billId}
+    </update>
+
+    <update id="deleteBill" parameterType="long">
+        delete from sys_bill where bill_id = #{id}
+    </update>
+
+</mapper>

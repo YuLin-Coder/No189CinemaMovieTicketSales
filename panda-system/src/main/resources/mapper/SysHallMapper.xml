@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.panda.system.mapper.SysHallMapper">
+
+    <resultMap id="sysHallMap" type="SysHall">
+        <result property="hallId" column="hall_id"></result>
+        <result property="cinemaId" column="cinema_id"></result>
+        <association property="sysCinema" column="cinema_id" select="com.panda.system.mapper.SysCinemaMapper.findCinema"></association>
+    </resultMap>
+
+    <select id="findAllHalls" resultMap="sysHallMap" parameterType="SysHall">
+        select * from sys_hall
+        <where>
+            del_state = 0
+            <if test="hallName != null and hallName != ''">
+                and hall_name like concat ('%', #{hallName}, '%')
+            </if>
+            <if test="hallCategory != null and hallCategory != ''">
+                and hall_category = #{hallCategory}
+            </if>
+        </where>
+    </select>
+
+    <select id="findHallById" parameterType="SysHall" resultMap="sysHallMap">
+        select * from sys_hall where hall_id = #{hallId}
+    </select>
+
+    <update id="addHall" parameterType="SysHall">
+        insert into sys_hall
+        (hall_name, hall_category, row_start, row_nums, seat_nums_row, seat_nums, seat_state)
+        values
+        (#{hallName}, #{hallCategory},
+                #{rowStart}, #{rowNums}, #{seatNumsRow}, #{seatNums}, #{seatState})
+    </update>
+
+    <update id="updateHall" parameterType="SysHall">
+        update sys_hall set
+        hall_name = #{hallName},
+        hall_category = #{hallCategory},
+        row_start = #{rowStart},
+        row_nums = #{rowNums},
+        seat_nums_row = #{seatNumsRow},
+        seat_nums = #{seatNums},
+        seat_state = #{seatState}
+        where hall_id = #{hallId}
+    </update>
+
+    <update id="deleteHall" parameterType="SysHall">
+        update sys_hall set del_state = 1 where hall_id  = #{hallId}
+    </update>
+
+</mapper>

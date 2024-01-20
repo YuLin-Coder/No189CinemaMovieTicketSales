@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.4.0</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+	<groupId>com.panda</groupId>
+	<artifactId>panda</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>panda</name>
+	<description>电影售票系统</description>
+
+	<!--加入子模块-->
+	<modules>
+		<module>panda-admin</module>
+		<module>panda-common</module>
+		<module>panda-system</module>
+		<module>panda-framework</module>
+	</modules>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>8</java.version>
+
+		<!--统一定义版本号-->
+		<panda.version>0.0.1-SNAPSHOT</panda.version>
+		<druid.version>1.2.2</druid.version>
+		<mybatis.springboot.version>2.1.3</mybatis.springboot.version>
+		<pagehelper.version>1.3.0</pagehelper.version>
+		<servlet.version>2.5</servlet.version>
+		<commons.io.version>2.5</commons.io.version>
+		<shiro.version>1.5.3</shiro.version>
+		<java-jwt.version>3.4.0</java-jwt.version>
+		<fastjson.version>1.2.74</fastjson.version>
+	</properties>
+
+	<!-- 只统一管理版本，实际依赖在各个模块自身中实现 -->
+	<dependencyManagement>
+		<dependencies>
+
+			<!-- shiro -->
+			<dependency>
+				<groupId>org.apache.shiro</groupId>
+				<artifactId>shiro-spring-boot-starter</artifactId>
+				<version>${shiro.version}</version>
+			</dependency>
+
+			<!-- mybatis -->
+			<dependency>
+				<groupId>org.mybatis.spring.boot</groupId>
+				<artifactId>mybatis-spring-boot-starter</artifactId>
+				<version>${mybatis.springboot.version}</version>
+			</dependency>
+
+			<!-- druid数据源 -->
+			<dependency>
+				<groupId>com.alibaba</groupId>
+				<artifactId>druid-spring-boot-starter</artifactId>
+				<version>${druid.version}</version>
+			</dependency>
+
+			<!-- pagehelper分页插件 -->
+			<dependency>
+				<groupId>com.github.pagehelper</groupId>
+				<artifactId>pagehelper-spring-boot-starter</artifactId>
+				<version>${pagehelper.version}</version>
+			</dependency>
+
+			<!-- 原生Servlet -->
+			<dependency>
+				<groupId>javax.servlet</groupId>
+				<artifactId>servlet-api</artifactId>
+				<version>${servlet.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>commons-io</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>${commons.io.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.auth0</groupId>
+				<artifactId>java-jwt</artifactId>
+				<version>${java-jwt.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.alibaba</groupId>
+				<artifactId>fastjson</artifactId>
+				<version>${fastjson.version}</version>
+			</dependency>
+
+			<!-- 子模块 -->
+			<dependency>
+				<groupId>com.panda</groupId>
+				<artifactId>panda-framework</artifactId>
+				<version>${panda.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.panda</groupId>
+				<artifactId>panda-system</artifactId>
+				<version>${panda.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.panda</groupId>
+				<artifactId>panda-common</artifactId>
+				<version>${panda.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.panda</groupId>
+				<artifactId>panda-admin</artifactId>
+				<version>${panda.version}</version>
+			</dependency>
+
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<plugins>
+			<!--本项目作为管理各个模块的父项目，不需要可执行，故将打包方式改为maven打包方式-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.1</version>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+					<encoding>${project.build.sourceEncoding}</encoding>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
